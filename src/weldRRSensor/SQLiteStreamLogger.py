@@ -140,7 +140,7 @@ class SQLiteStreamLogger:
 
         return key
 
-    def log_data(self, topic_name: str, data: np.ndarray, timestamp_ns: int | None = None) -> bool:
+    def log_data(self, topic_name: str, data: np.ndarray, timestamp_ns: int | None = None, timestamp_sent_ns: int | None = None) -> bool:
         """
         Called from callback. MUST be fast. Never blocks.
         Returns True if enqueued, False if dropped.
@@ -163,9 +163,11 @@ class SQLiteStreamLogger:
 
         if timestamp_ns is None:
             timestamp_ns = time.time_ns()
+        if timestamp_sent_ns is None:
+            timestamp_sent_ns = time.time_ns()
 
         blob = data.tobytes(order="C")
-        item = (key, timestamp_ns, blob)
+        item = (key, timestamp_ns, blob, timestamp_sent_ns)
 
         try:
             self._q.put(item, block=False)
@@ -364,7 +366,7 @@ class SQLiteStreamLogger:
             # Pull items quickly
             try:
                 item = self._q.get(timeout=0.02)
-                item_actual = (self._ensure_topic_id(item[0]), item[1], item[2])
+                item_actual = (self._ensure_topic_id(item[0]), item[1], item[2], item[3])
                 batch.append(item_actual)
             except queue.Empty:
                 pass
@@ -377,7 +379,7 @@ class SQLiteStreamLogger:
             if should_commit:
                 # Write batch
                 self._cur.executemany(
-                    "INSERT INTO messages(topic_id, timestamp_ns, data) VALUES (?, ?, ?);",
+                    "INSERT INTO messages(topic_id, timestamp_ns, data, timestamp_sent_ns) VALUES (?, ?, ?, ?);",
                     batch
                 )
                 self._con.commit()
@@ -420,7 +422,7 @@ class SQLiteStreamLogger:
                     self._rollovers += 1
 
             self._cur.executemany(
-                "INSERT INTO messages(topic_id, timestamp_ns, data) VALUES (?, ?, ?);",
+                    "INSERT INTO messages(topic_id, timestamp_ns, data, timestamp_sent_ns) VALUES (?, ?, ?, ?);",
                 batch
             )
             self._con.commit()

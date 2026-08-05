@@ -310,9 +310,11 @@ class WeldRRSensorLogger(object):
         
         if self.start_robot_cb:
             timestamp_ns = int((time.perf_counter()+self.t_offset)*1e9)
-            self.logger.log_data(self.robot_joint_topic_name,
-                                 wrap_angle(np.array(value.joint_position).astype(self.msg_type)),
-                                 timestamp_ns=timestamp_ns)
+            self.logger.log_data(
+                self.robot_joint_topic_name,
+                wrap_angle(np.array(value.joint_position).astype(self.msg_type)),
+                timestamp_ns=timestamp_ns
+            )
 
     ##### welding and current recording callbacks and functions #####
     def weld_cb(self, sub, value, ts):
