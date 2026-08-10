@@ -267,6 +267,7 @@ class SQLiteStreamLogger:
             topic_id INTEGER NOT NULL,
             timestamp_ns INTEGER NOT NULL,
             data BLOB NOT NULL,
+            timestamp_sent_ns INTEGER NOT NULL,
             FOREIGN KEY(topic_id) REFERENCES topics(id)
         );
         """)
