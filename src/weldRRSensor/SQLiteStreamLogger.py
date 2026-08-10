@@ -164,7 +164,7 @@ class SQLiteStreamLogger:
         if timestamp_ns is None:
             timestamp_ns = time.time_ns()
         if timestamp_sent_ns is None:
-            timestamp_sent_ns = time.time_ns()
+            timestamp_sent_ns = timestamp_ns
 
         blob = data.tobytes(order="C")
         item = (key, timestamp_ns, blob, timestamp_sent_ns)

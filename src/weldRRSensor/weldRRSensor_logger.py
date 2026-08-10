@@ -306,11 +306,10 @@ class WeldRRSensorLogger(object):
         self.start_current_cb=False
     
     ##### robot state recording callbacks and functions #####
-    def robot_state_cb(self, sub, value, ts, sent_ts):
-        
+    def robot_state_cb(self, sub, value, ts):
         if self.start_robot_cb:
             timestamp_ns = int((time.perf_counter()+self.t_offset)*1e9)
-            timestamp_sent_ns = int((value.timestamp)*1e9)
+            timestamp_sent_ns = int((value.ts[0][0])*1e3)
             self.logger.log_data(
                 self.robot_joint_topic_name,
                 wrap_angle(np.array(value.joint_position).astype(self.msg_type)),
